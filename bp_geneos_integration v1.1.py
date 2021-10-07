@@ -10,7 +10,7 @@ def send_to_bp_rest_api(appkey,bearer,jsonData):
 #Writes Json file to directory for BigPanda agent
 def send_to_bp_agent(directory,jsonData):
     try:
-        with open(directory+'alert'+str(uuid.uuid4())+'.json','w') as outfile:
+        with open(directory+'bp_alert'+str(uuid.uuid4())+'.json','w') as outfile:
             outfile.write(jsonData)
     except EnvironmentError as error:
         logging.error('Failed to create json file: '+str(error)+'----JSON DATA'+jsonData)
