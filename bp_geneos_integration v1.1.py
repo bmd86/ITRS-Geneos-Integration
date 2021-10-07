@@ -1,4 +1,4 @@
-import sys,getopt,os,uuid,json,logging
+import sys,getopt,os,uuid,json,logging,time
 logging.basicConfig(format='%(asctime)s %(levelname)s: %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p',filename="bp_itrs_integration.log",encoding='utf-8', level=logging.WARNING)
 #Sends alerts to BigPanda usign curl
 def send_to_bp_rest_api(appkey,bearer,jsonData):
@@ -16,10 +16,15 @@ def send_to_bp_agent(directory,jsonData):
         logging.error('Failed to create json file: '+str(error)+'----JSON DATA'+jsonData)
     return True
 #Creates JSON payload based on appkey and environment variables
-def format_json(appkey,envarlist):
+def format_json(appkey,envarlist,primaryproperty,secondaryproperty):
     jsonData = "{"
     if appkey:
         jsonData+='"app_key":"'+appkey+'",'
+    if primaryproperty:
+        jsonData+='"primary_property":"'+primaryproperty+'",'
+    if secondaryproperty:
+        jsonData+='"secondary_property":"'+secondaryproperty+'",'
+    jsonData+='"timestamp":"'+str(time.time())+'",'
     for envar in envarlist:
         name = envarlist.get(envar)
         envarvalue = str(os.getenv(envar,""))
@@ -39,6 +44,7 @@ def main(argsv):
         "_NETPROBE_HOST":"bp_host",
         "_MANAGED_ENTITY":"managed_entity",
         "_RULE":"bp_check",
+        "_GATEWAY":"gateway",
         "_SAMPLER":"Sampler",
         "_PLUGINNAME":"plugin_name",
         "_DATAVIEW":"Dataview",
@@ -46,11 +52,16 @@ def main(argsv):
         "_COLUMN":"column",
         "_HEADLINE":"headline",
         "_attributes":"",
-        "Environment":"",
-        "VM":"",
         "_VARIABLE":"variable",
         "_VALUE":"value",
-        "_USERDATA ":""}
+        "_USERDATA ":"",
+        "Environment":"",
+        "Client":"",
+        "Host":"",
+        "Location":"",
+        "Component":"",
+        "UUID":""
+        }
     #Set default values
     directory="X:/Users/bdant/Documents/Scripts/"
     appkey="123"
@@ -86,7 +97,7 @@ def main(argsv):
     else:
         envarlist=default_envar
     #create JSON
-    jsonData = format_json(appkey,envarlist)
+    jsonData = format_json(appkey,envarlist,primaryproperty,secondaryproperty)
     try:
         json.loads(jsonData)
     except ValueError as err:
